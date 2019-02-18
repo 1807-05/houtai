@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+    <script src="/jquery-1.8.0.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+    <style type="text/css">
+        #download {
+            position: relative;
+            display: inline-block;
+            border: 1px solid #99D3F5;
+            border-radius: 4px;
+            padding: 7px 7px;
+            color: #1E88C7;
+            text-decoration: none;
+            text-indent: 0;
+            line-height: 15px;
+        }
+        #download input {
+            position: absolute;
+            font-size: 100px;
+            right: 0;
+            top: 0;
+            opacity: 0;
+        }
+        #download:hover {
+            background: #AADFFD;
+            border-color: #78C3F3;
+            color: #004974;
+            text-decoration: none;
+        }
+    </style>
+
+</head>
+<script type="text/javascript" th:inline="none">
+    $(function(){
+   query();
+    });
+    function query(){
+        $('#dg').datagrid({
+            url:"/goods/queryAllGoods",
+            striped:true,
+            toolbar:'#tb',
+            pagination:true,
+            pageList:[1,2,3,10],
+            pageSize:3,
+            rowStyler: function(index,row){
+                if (index%2==0){
+                    return 'background-color:#6293BB;color:#fff;';
+                }
+            },
+            loadMsg:'正在加载,别着急',
+            columns:[[
+                {field:'aa',title:'ID',checkbox:true,width:50},
+                {field:'id',title:'ID',width:50},
+                {field:'shp_mch',title:'名称',width:200,align:'right'},
+                {field:'shp_msh',title:'商品描述',width:300,align:'right'},
+                {field:'zy',title:'作用',width:100,align:'right'},
+                {field:'chjshj',title:'时间',width:100,align:'right',
+                    formatter:function(value,row,index){
+                        var date=new Date(value);
+                        var aa= date.toLocaleDateString(date);
+                        return aa;
+                    }
+                },
+                {field:'shp_tp',title:'图片',width:200,align:'right',
+                    formatter: function(value,row,index){
+                    var  tp="";
+                    var  arr=value.split(",");
+                    $.each(arr,function(index,obj){
+                        tp+="<img width='66' src='/upload/"+obj+"'>";
+                    });
+                     return tp;
+                    }},
+
+                {field:'xxx',title:'操作',width:100,align:'right',
+                    formatter:function(value,row,index){
+                    var  cou="<a href='javascript:void(0)'  onClick=deleteOneGoods("+row.id+")>删 除</a> |  ";
+                    cou+="";
+                    return  cou;
+                    }},
+            ]],
+        });
+    }
+
+      function  deleteOneGoods(id){
+          $.ajax({
+             url:"../goods/deleteOneGoods",
+             type:"POST",
+             data:{id:id},
+             success:function(rescult){
+                 $.messager.alert("提示","删除成功!");
+                 $("#dg").datagrid("reload");
+             }
+          });
+      }
+      function leading() {
+          $.ajax({
+              url:"/poi/leadingin",
+              type:"post",
+              data:{originUrl:$("#file").val()},
+              success:function(result){
+                  if(result==1){
+                      $.messager.alert('提示','导入成功');
+                  }
+                  query();
+              },
+              error:function(){
+                  alert("导入失败");
+              }
+          })
+      }
+      function derive() {
+          var arrGoods = $('#dg').datagrid('getChecked');
+          if (arrGoods.length == 0) {
+              $.messager.alert("提示","请选择要导出的数据!");
+          }else{
+              var ids="";
+              // 定义存放id数组，前端直接往后台传入数组类型，到mybatis xml文件直接批量删除操作
+              $.each(arrGoods,function(index,obj){
+                  ids+= ids==''?obj.id:","+obj.id;
+              });
+              $.messager.confirm('提示','你确定导出'+arrGoods.length+'条记录吗?',function(r){
+                  if(r){
+                      $.ajax({
+                          url:'/poi/derive',
+                          type:'post',
+                          data:{ids:ids},
+                          success:function(data){
+                              $.messager.alert('提示','导出成功');
+                              query();
+                          },
+                          error:function(){
+                              alert("导出失败");
+                          }
+                      })
+                  }
+              });
+          }
+      }
+</script>
+<body>
+    <div id="tb">
+        <a href="javascript:void(0)" id="download">导入
+            <input type="file" id="file" onchange="leading()" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+            <a href="javascript:void(0)" onclick="derive()" class="easyui-linkbutton">导出</a>
+            <a href="http://download.microsoft.com/download/5/6/7/5671A1FE-F11B-4BE9-8076-0595020F3386/Course List-04-General Template-for-Excel.xlsx">下载模板</a>
+        </a>
+    </div>
+    <table id="dg"  ></table>
+    <a   href="/view/toView?viewName=goodsMassage">返回</a>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jk.mapper.PoiMapper">
+    <insert id="insertGoodsInfo">
+        insert into t_mall_product(shp_mch,shp_tp,flbh1,flbh2,pp_id,chjshj,shp_msh)
+        values (#{shp_mch},#{shp_tp},#{flbh1},#{flbh2},#{pp_id},#{chjshj},#{shp_msh})
+    </insert>
+    <select id="selectGoodsInfo" resultType="com.jk.bean.PoiTest">
+        select * from t_mall_product where id in (${_parameter})
+    </select>
+</mapper>

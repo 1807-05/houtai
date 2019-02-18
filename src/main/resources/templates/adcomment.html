@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/jquery-1.8.0.js"></script>
+</head>
+<script type="text/javascript">
+    $(function(){
+        queryZc();
+    })
+    function queryZc() {
+        $.ajax({
+            url:"/excom/queryZc",
+            type:"get",
+            success:function (com) {
+                var content="";
+                for (var i=0;i<com.length;i++){
+                    content+="<tr>";
+                    content+="<td>"+com[i].zc+"</td>";
+                    content+="<td><input type='button' value='删除' onclick='delZc("+com[i].id+")'></td>";
+                    content+="</tr>";
+                }
+                $("#tbody").html(content);
+            }
+        })
+    }
+    function delZc(id) {
+        $.ajax({
+            url:"/excom/delZc",
+            data:{id,id},
+            success:function (r) {
+                queryZc();
+            }
+        })
+    }
+    function addZc() {
+        if ( $("[name='zc']").val()!=null&&$("[name='zc']").val()!="") {
+        $.ajax({
+            url:"/excom/addZc",
+            data:$("form").serialize(),
+            success:function (r) {
+                $("[name='zc']").val("");
+                queryZc();
+            }
+        })
+        }else {alert("不能为空!!")}
+    }
+    function queryCom() {
+        $.ajax({
+            url:"/excom/queryCom",
+            type:"get",
+            success:function (com) {
+                var content="";
+                for (var i=0;i<com.length;i++){
+                    content+=com[i].plnr+"<br>";
+                    content+="<input type='button' value='通过' onclick='updateCom("+com[i].id+")'>";
+                    content+="  <input type='button' value='删除' onclick='delCom("+com[i].id+")'><br>";
+                }
+                $("#div").html(content);
+            }
+        })
+    }
+    function delCom(id) {
+        $.ajax({
+            url:"/excom/delCom",
+            data:{id,id},
+            success:function (r) {
+                queryCom();
+            }
+        })
+    }
+    function updateCom(id) {
+        $.ajax({
+            url:"/excom/updateCom",
+            data:{id,id},
+            success:function (r) {
+                queryCom();
+            }
+        })
+    }
+</script>
+<body>
+<center>
+<table>
+    <thead>
+    <tr>
+        <td>敏感字词</td>
+        <td>操作</td>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+    </tbody>
+</table>
+<form>
+<input name="zc">
+</form>
+    <input type="button" value="添加敏感字词" onclick="addZc()"><br>
+    <br>
+    <input type="button" value="查看拦截的敏感评论" onclick="queryCom()">
+    <br>
+    <br>
+    -------------------------------------------------------------------------------
+    <div id="div"></div>
+</center>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+    <script src="/jquery-1.8.0.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+</head>
+<script type="text/javascript" th:inline="none">
+    $(function(){
+        query();
+        load();
+        $("#dialog_add").dialog('close');
+    });
+    function query(){
+        $('#dg').datagrid({
+            url:"/goods/querytite",
+            striped:true,
+            toolbar:'#tb',
+            pagination:true,
+            pageList:[1,2,3,10],
+            pageSize:10,
+            rowStyler: function(index,row){
+                if (index%2==0){
+                    return 'background-color:#6293BB;color:#fff;';
+                }
+            },
+            loadMsg:'正在加载,别着急',
+            columns:[[
+                {field:'xxx',title:'ID',width:50,checkbox:true},
+                {field:'id',title:'ID',width:50},
+                {field:'text',title:'名称',width:200,align:'right'},
+                {field:'url',title:'路径',width:300,align:'right'},
+                {field:'xx',title:'操作',width:100,align:'right',
+                    formatter:function(value,row,index){
+                        var  cou="<a href='javascript:void(0)'  onClick=deleteOneGoods("+row.id+")>删除  </a>";
+                        cou+="<a href='javascript:void(0)'  onClick=updategoods("+row.id+")>修改</a>";
+                        return  cou;
+                    }},
+            ]],
+        });
+    }
+
+    function  deleteOneGoods(id){
+        $.ajax({
+            url:"/goods/deletegoodtite",
+            type:"POST",
+            data:{id:id},
+            success:function(rescult){
+                $.messager.alert("提示","删除成功!");
+                $("#dg").datagrid("reload");
+            }
+        });
+    }
+    function updategoods(id){
+        $.ajax({
+            url:"/goods/updategoods",
+            type:"POST",
+            data:{id:id},
+            success:function(arr){
+                $("#dialog_add").dialog('open');
+                $("#add_book_form").form("load",arr)
+            }
+        });
+
+    }
+    function addBook(){
+        //点击增加按钮 打开对话框
+        $("#dialog_add").dialog('open');
+        $("#add_book_form").form('clear');
+    }
+    function submitData(){
+        $.ajax({
+            url:"/goods/goodtiteadd",
+            type:"post",
+            data:$("#add_book_form").serialize(),
+            success:function () {
+                $("#dialog_add").dialog('close');
+                $("#dg").datagrid("reload");
+            }
+        })
+    }
+    function load(){
+        $("#delbutton").linkbutton({
+            onClick:function(){
+                var val=$("#dg").datagrid('getChecked');
+                if(val.length==0){
+                    $.messager.show({
+                        title:'提示信息',
+                        msg:'至少选择一条',
+                        timeout:2000,
+                        showType:'show',
+                    });
+                }else{
+                    $.messager.confirm("信息","是否导出这"+val.length+"条数据吗?",function(r){
+                        if(r){
+                            var ids ='';
+                            $.each(val,function(index,obj){
+                                ids+= ids==''?obj.id:","+obj.id;
+                            });
+                            deletes(ids);
+                        }
+                    });
+                };
+            }
+        });
+    }
+    function deletes(ids){
+        $.ajax({
+            url:"/goods/daochu?ids="+ids,
+            success:function(){
+                $("#show").datagrid('reload');
+                $.messager.show({
+                    title:'消息',
+                    msg:'导出成功!!',
+                    timeout:2000,
+                });
+            }
+        });
+    }
+    function dao(){
+        $.ajax({
+            url:"/goods/importExcel",
+            success:function(){
+                $("#show").datagrid('reload');
+                $.messager.show({
+                    title:'消息',
+                    msg:'导入成功!!',
+                    timeout:2000,
+                });
+            }
+        });
+
+    }
+    function tijiao(){
+        var formData = new FormData($("#xixi")[0]);
+        $.ajax({
+            url:"/goods/importss",
+            data:formData,
+            type:"post",
+            cache: false,
+            contentType: false,
+            processData: false,
+            success:function(arr){
+                if(arr==2){
+                    $("#show").datagrid('reload');
+                    $.messager.show({
+                        title:'消息',
+                        msg:'导入成功!!',
+                        timeout:2000,
+                    });
+                }else{
+                    $("#show").datagrid('reload');
+                    $.messager.show({
+                        title:'消息',
+                        msg:'类型不一致!!',
+                        timeout:2000,
+                    });
+
+                }
+
+            }
+        })
+    }
+</script>
+<body>
+<div id="tb">
+    <a id="btn_addd"   href="javascript:void(0)" class="easyui-linkbutton" onClick="dao()" data-options="iconCls:'icon-add'">导入</a>
+    <a id="btn_add"   href="javascript:void(0)" class="easyui-linkbutton" onClick="addBook()" data-options="iconCls:'icon-add'">增加</a>
+    <a id="delbutton" class="easyui-linkbutton" iconCls="icon-remove" >导出</a></div>
+<form id="xixi">
+    <input type="file" name="fill" >选择提交
+</form>
+<a id="btn_adddd"   href="javascript:void(0)" class="easyui-linkbutton" onClick="tijiao()" data-options="iconCls:'icon-add'">确认导入</a>
+<div id="dialog_add"   class="easyui-dialog" title="My Dialog" style="width:800px;height:300px;"
+     data-options="iconCls:'icon-save',resizable:true,modal:true,
+			buttons:[{
+				text:'保存',
+				iconCls:'icon-save',
+				handler:function(){
+					submitData()
+				}
+			}]">
+
+    <form id="add_book_form">
+        <input name="id"  type="hidden" id="id2">
+        名称:<input name="text" id="text2" class="easyui-textbox" data-options="iconCls:'icon-man'" > <br/>
+        路径:<input name="url" class="easyui-textbox" data-options="iconCls:'icon-man'" id="url2"> <br/>
+    </form>
+</div>
+<table id="dg"  ></table>
+</body>
+</html>

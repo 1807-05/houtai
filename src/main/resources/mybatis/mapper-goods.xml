@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jk.mapper.GoodsMapper">
+<select id="queryGoods" resultType="com.jk.bean.MallClass1">
+    select * from t_mall_class_1
+</select>
+    <select id="querySecondGoods" resultType="com.jk.bean.MallClass2">
+    select * from t_mall_class_2 where flbh1=#{id}
+    </select>
+    <insert id="addImg">
+        insert into t_mall_product_image (zy,shp_id,url) values
+        <foreach collection="img" separator="," item="img">
+         (null,${id},"${img}")
+        </foreach>
+    </insert>
+    <insert id="addGoods">
+        insert into t_mall_product(shp_mch,shp_tp,flbh1,flbh2,pp_id,chjshj,shp_msh)
+        values (#{shp_mch},#{shp_tp},#{flbh1},#{flbh2},#{pp_id},sysdate(),#{shp_msh})
+    </insert>
+    <select id="queryId" resultType="integer">
+        select max(id) from t_mall_product
+    </select>
+    <select id="queryAllGoods"  resultType="com.jk.bean.GoodsInfo" >
+
+        select p.*,i.shp_id,i.zy,i.url from t_mall_product p LEFT JOIN
+         t_mall_product_image i  on  p.Id = i.shp_id  group by
+     p.Id
+    </select>
+
+
+    <!--void deleteOneGoods(String id);-->
+    <delete id="deleteOneGoods" >
+        delete from t_mall_product where id=#{id}
+    </delete>
+
+    <!-- void deleteTwoGoods(String id);-->
+    <delete id="deleteTwoGoods" >
+        delete from t_mall_product_image where shp_id=#{id}
+    </delete>
+
+
+    <!--List<GoodsComment> queryGoodsComment(GoodsComment comment);-->
+    <select id="queryGoodsComment"  resultType="com.jk.bean.GoodsComment" >
+      select c.*,t.yh_mch,t.yh_nch from
+       t_mall_product_comment c,t_mall_user_account t
+       where c.yh_id = t.Id and c.dd_state = 1
+            and c.shp_id = #{shp_id}
+
+    </select>
+
+
+
+    <select id="querytite" resultType="Website">
+         select * from t_other_website
+    </select>
+    <delete id="deletetite">
+        delete  from t_other_website where id=#{id}
+    </delete>
+    <insert id="goodstiteadd">
+        insert  into t_other_website(text,url) values(#{text},#{url})
+    </insert>
+    <select id="updategoods" resultType="Website">
+        select * from t_other_website where id=#{id}
+    </select>
+    <update id="updategoodstite">
+        update t_other_website set text=#{text},url=#{url} where id=#{id}
+    </update>
+</mapper>

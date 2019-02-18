@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/jquery-1.8.0.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+
+    <script type="text/javascript">
+        $(function(){
+            getCombobox();
+        });
+        function getCombobox(){
+            $('#cc').combobox({
+                url:"/json/class_1.js",
+                valueField:'id',
+                method:'get',
+                textField:'flmch1',
+                onSelect: function(item){
+                    $('#cc1').combobox({
+                        url:"/json/class_2_"+item.id+".js",
+                        method:'get',
+                        valueField:'id',
+                        textField:'flmch2',
+                        onSelect: function(rec){
+                          $.ajax({
+                              url:'/sku/getchecked',
+                              data:{id:rec.id},
+                              success:function(item){
+                                  var coun="";
+                                  $.each(item,function(index,obj){
+
+                                      coun+="<input type='checkbox' value="+obj.id+" name='attrlist["+index+"].shxm_id' onclick='getcheckedid(this)'> "+obj.shxmMch+" "
+
+                                  });
+                                  $("#div").html(coun)
+
+                              }
+                          });
+
+                            $('#cc2').combobox({
+                                url:"/json/tm_class_1_"+rec.flbh1+".js",
+                                method:'get',
+                                valueField:'id',
+                                textField:'ppmch',
+                                onSelect:function(pid){
+                                    $("#cc3").combobox({
+                                        url:'/sku/getprodbyid?id='+pid.id,
+                                        method:'get',
+                                        valueField:'id',
+                                        textField:'shp_mch',
+                                    })
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+var indexcount=-1;
+function getcheckedid(check) {
+    indexcount++;
+    var count = "";
+    if ($(check).is(":checked")) {
+        var count2 = "";
+        count = $(check).val();
+        $.ajax({
+            url: '/sku/querythis',
+            data: {ids: count},
+            success: function (item) {
+                count2+="<div id='"+check.value+"'>";
+                $.each(item, function (index, obj) {
+                    count2 += "<input type='radio' name='attrlist["+indexcount+"].shxzh_id' value=" + obj.id + ">" + obj.shxzh + "" + obj.shxzhMch;
+                });
+                count2+="</div>";
+                    $("#orders").append(count2)
+            }
+
+        })
+    }else{
+        $("#"+check.value+"").remove();
+    }
+}
+function addsku(){
+    $.ajax({
+        url:"/sku/addsku",
+        type:"POST",
+        data:$("#form").serialize(),
+        success:function(){
+            location=location;
+        },
+        error:function(){
+            alert("失败了");
+        }
+    });
+
+}
+    </script>
+</head>
+<body>
+
+<form id="form">
+商品sku管理<br/>
+<input id="cc"  value="请选择"> <input id="cc1"  value="请选择"> <input id="cc2"  value="请选择"> <input id="cc3" name="shp_id" value="请选择">
+<hr/>
+属性列表页
+<div id="div">
+
+</div><br/>
+<div id="orders">
+
+</div>
+<hr/>
+商品库存名称 <input name="sku_mch"> <br/>
+商品库存数量 <input name="kc"><br/>
+商品库存价格 <input name="jg"><br/>
+商品库存地址 <input name="kcdz"><br/>
+</form>
+<input type="button" value="点击添加" onclick="addsku()">
+</body>
+</html>

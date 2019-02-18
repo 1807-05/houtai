@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jk.mapper.MallAttrMapper">
+
+    <!--   带mv是value表   List<MallAttr> queryMallAttr(MallAttr mallAttr);-->
+      <select id="queryMallAttr"  resultType="MallAttr" >
+          SELECT
+          tma.id id,
+          tma.shfqy shfqy,
+          tma.shxm_mch shxmMch,
+          tma.chjshj chjshj,
+          a.shxmValue shxmValue
+          FROM
+          t_mall_attr tma,
+          (
+          SELECT
+          tmv.shxm_id id,
+          GROUP_CONCAT(tmv.shxzh, tmv.shxzh_mch) shxmValue
+          FROM
+          t_mall_value tmv
+          GROUP BY
+          shxm_id
+          ) a
+          WHERE
+          tma.id = a.id
+              <if test="vid != null and vid > 0 ">
+                  and tma.flbh2 = #{vid}
+              </if>
+      </select>
+
+
+
+
+
+    <!-- void addAttr(@Param("id") int id,@Param("mv") MallValue mallValue);-->
+    <insert id="addAttr">
+        insert into t_mall_attr(shxm_mch,shfqy,flbh2,chjshj) values (#{mv.shxmMch},1,#{id},SYSDATE())
+    </insert>
+
+    <!--    void selectAttrId();-->
+    <select id="selectAttrId" resultType="int">
+          select max(id) from t_mall_attr
+    </select>
+
+    <insert id="addAttrValue" parameterType="map" >
+            insert into t_mall_value(shxzh,shfqy,shxm_id,shxzh_mch,chjshj) values (
+              #{shxzh},1,#{shxmId},#{shxzhMch},SYSDATE())
+
+         </insert>
+</mapper>

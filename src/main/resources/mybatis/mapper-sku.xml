@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jk.mapper.MallSkuMapper">
+    <select id="getprodbyid" resultType="goodsInfo">
+
+  select * from t_mall_product where pp_id = #{pid}
+    </select>
+    <select id="getchecked" resultType="mallattr">
+  select *,shxm_mch shxmMch from t_mall_attr where flbh2=#{id}
+    </select>
+  <select id="querythis" resultType="mallvalue">
+    select *,shxzh_mch shxzhMch from t_mall_value where shxm_id=#{ids}
+  </select>
+  <insert id="addmallsku">
+  <selectKey resultType="int" order="AFTER" keyProperty="id">
+    select last_insert_id() as id
+  </selectKey>
+    insert into t_mall_sku(shp_id,kc,jg,chjshj,sku_mch,kcdz) values(#{shp_id},#{kc},#{jg},now(),#{sku_mch},#{kcdz})
+  </insert>
+  <insert id="addmallskuattrVal">
+    insert into t_mall_sku_attr_value(shxm_id,shxzh_id,shp_id,chjshj,sku_id) values
+    <foreach collection="list" item="list" separator=",">
+      <if test="list.shxm_id!=null and list.shxzh_id!=null">
+        (#{list.shxm_id},#{list.shxzh_id},#{add.shp_id},now(),#{add.id})
+      </if>
+    </foreach>
+  </insert>
+</mapper>

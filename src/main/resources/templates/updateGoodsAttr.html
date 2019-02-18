@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="/jquery-1.8.0.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+
+    <script type="text/javascript">
+
+            $(function () {
+                updateGoodsAttr("[[${param.id}]]")
+            });
+
+           function updateGoodsAttr(id){
+
+               $.ajax({
+                   url:"/attr/updateGoodsAttr",
+                   type:"POST",
+                   data:{id:id},
+                   success:function(result){
+
+                       var arr = new Date(value).toLocaleDateString().split("/");
+
+                       $("#form").form('load',result);
+                       $("[name='chjshj']").val(arr[0]+"-"+arr[1]+"-"+arr[2]);
+                   },
+                   error:function(){
+                       alert("失败了");
+                   }
+               })
+
+           }
+
+    </script>
+
+</head>
+<body>
+
+
+<form id="form">
+
+    <input type="hidden" name="flbh2">
+            <table>
+                <tr>
+                    <td>属性值</td>
+                    <td><input name="shxmMch"></td>
+                </tr>
+                <tr>
+                    <td>日期</td>
+                    <td><input type="date"  name="chjshj"> </td>
+                </tr>
+                <tr>
+                    <td> </td>
+                    <td> </td>
+                </tr>
+
+            </table>
+</form>
+<input type="button" onclik="updateGoodsAttr()">
+</body>
+</html>

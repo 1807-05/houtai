@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/jquery-1.8.0.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+    <link rel="stylesheet" href="/js/easyui1.5/themes/icon.css">
+
+    <script type="text/javascript" th:inline="none">
+        $(function(){
+            getCombobox();
+
+            getMallAttrMsg(0);
+
+        });
+        function getCombobox(){
+            $('#cc1').combobox({
+                url:"/json/class_1.js",
+                valueField:'id',
+                method:'get',
+                toolbar:'tb',
+                textField:'flmch1',
+                onSelect: function(item){
+                    $('#cc2').combobox({
+                        url:'/json/class_2_'+item.id+'.js',
+                        method:'get',
+                        valueField:'id',
+                        textField:'flmch2',
+                        onSelect: function(rec){
+                           getMallAttrMsg(rec.id);
+                        },setValue:function(aa){
+                            id:aa.id
+                        }
+                    });
+                }
+            });
+        }
+
+        function getMallAttrMsg(id) {
+            $('#show_table').datagrid({
+                url:'/attr/queryMallAttr',
+                pagination:true,
+                pageList:[1,2,3,4,5,10],
+                pageSize:10,
+                columns:[[
+                    {field:'id',title:' id',width:'10%'},
+                    {field:'shxmMch',title:'属性名',width:'20%'},
+                    {field:'shfqy',title:'是否启用',width:'10%',
+                        formatter:function(value,row,index){
+                            if(value == 1){
+                                return "是";
+                            }else{
+                                return "否";
+                            }
+                        }},
+                    {field:'chjshj',title:'创建时间',width:'20%',
+                        formatter:function(value,row,index){
+                            var arr = new Date(value).toLocaleDateString().split("/");
+                            return arr[0]+"/"+arr[1]+"/"+arr[2];
+                        }
+                    },
+                    {field:'shxmValue',title:'属性值',width:'30%'},
+                    {field:'ssxxx0',title:'操作',width:'20%',
+                        formatter:function(value,row,index){
+                            var content = "";
+                                content+= "<a href='JavaScript:updateAttr("+row.id+")'>修改</a>";
+
+                            return content;
+                        }
+                    },
+
+                ]],
+                //如果为true，当用户点击行的时候该复选框就会被选中或取消选中。
+                checkOnSelect:false,
+                queryParams: {
+                    vid:id
+                }
+
+            });
+        }
+
+        function addGoodsAttr(){
+            var id = $("#cc2").combobox("getValue");
+
+            var name = $("#cc1").combobox("getText");
+
+            var name1 = $("#cc2").combobox("getText");
+
+            location.href="/view/toView?viewName=addGoodsAttr&shxmId="+id+"&name="+name+"&name1="+name1;
+        }
+
+
+        //修改
+        function updateAttr(id){
+            location.href="/view/toView?viewName=updateGoodsAttr&id="+id;
+        }
+
+    </script>
+
+</head>
+<body>
+<div fit=true>
+        <div id = "tb">
+            <input id="cc1" name="dept" value="请选择">
+            <input id="cc2" name="dept" value="请选择">
+            <a id="btn" href="javascript:void(0)" onclick = "addGoodsAttr()" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加属性</a>
+        </div>
+    <table id="show_table" ></table>
+
+</div>
+</body>
+</html>

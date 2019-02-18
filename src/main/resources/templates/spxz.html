@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+
+    <script src="/jquery-1.8.0.js"></script>
+
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" href="/js/easyui1.5/themes/default/easyui.css">
+    <!--图片-->
+    <link rel="stylesheet" href="/js/uploadify/uploadify.css">
+    <script src="/js/uploadify/jquery.uploadify.min.js"></script>
+    <!--end-->
+
+</head>
+
+
+<script type="text/javascript">
+    $(function(){
+
+        preFile();
+        getyiji();
+    });
+    function getyiji(){
+        //给出版社下拉框赋值
+        $('#cc1').combobox({
+            url:'/GoodsInfoAdd/queryGoods',
+            valueField:'id',//<select> <option value='obj.id' > obj.name</select>    $([],functtion(index,obj){})
+            textField:'flmch1',  //<select> <option > xxx  </option> </select>
+            loadFilter:function(data){
+                data.push({id:-2,name:'其他_前台'});
+                return data;
+            },
+            onChange:function(item){
+                //出版社的选中  事件  根据当前点id去加载出版社对应图书类型
+                ////给类型下拉框赋值
+                geterji(item)
+            }}); }
+    function geterji(pid){
+        //给出版社下拉框赋值
+        $('#cc2').combobox({
+            url:'/GoodsInfoAdd/querySecondGoods?id='+pid,
+            valueField:'id',//<select> <option value='obj.id' > obj.name</select>    $([],functtion(index,obj){})
+            textField:'flmch2',  //<select> <option > xxx  </option> </select>
+            loadFilter:function(data){
+                data.push({id:-2,name:'其他_前台'});
+                return data;
+            },
+            onSelect(record){
+                //出版社的选中  事件  根据当前点id去加载出版社对应图书类型
+                ////给类型下拉框赋值
+                getsanji(record)
+            }}); }
+    function getsanji(record){
+        $('#cc3').combobox({
+            url:"/json/tm_class_1_"+record.flbh1+".js",
+            valueField:'id',
+            textField:'ppmch',
+            method:'get',
+
+        })
+
+
+    }
+
+    var  num=1;
+    var  tp2="";
+    function preFile(){
+        //上传插件
+        $("#uploadify").uploadify({
+            //插件自带  不可忽略的参数
+            'swf': '/js/uploadify/uploadify.swf',
+            //前台请求后台的url 不可忽略的参数                          //*****要修改路经 !!!!!!!!!!!!!!!!!!!!!!!!
+            'uploader':'/GoodsInfoAdd/addImg',
+            //给div的进度条加背景 不可忽略
+            'queueID': 'fileQueue',
+            //上传文件文件名 !!!!!!!!!!!!!!!!!!与后台接口参数名字需要完全一致!!!!!!!!!!!!!!!!!!!!!!!!
+            'fileObjName' : 'imgfile',
+            //给上传按钮设置文字
+            'buttonText': '上传图片',
+            //设置文件是否自动上传
+            'auto': true,
+            //可以同时选择多个文件 默认为true  不可忽略
+            'multi': true,
+            //上传后队列是否消失
+            'removeCompleted': true,
+            //队列消失时间
+            'removeTimeout' : 1,
+            //上传文件的个数，项目中一共可以上传文件的个数
+            'uploadLimit':  -1,
+            'onFallback':function(){alert("浏览器不支持,请更换其他浏览器,或打开Flash插件");},
+            //上传失败
+            'onUploadError':function(){
+                alert("上传失败");
+            },
+            //成功回调函数 file：文件对象。data后台输出数据
+            'onUploadSuccess':function(file,data,response){
+                var imgurl = "/upload/"+data;
+                var  tp="";
+                  tp+=' <input name="shp_tp" id="hideImg'+num+'" value="'+data+'" type="text" >';
+                  tp+='<img id="testimg'+num+'" src="'+imgurl+'" width="50px" height="50px">' ;
+                  tp+=tp2;
+                  $("#div1").html(tp);
+                   tp2=$("#div1").html();
+                 num++;
+            }
+        });
+    }
+    function add(){
+
+        $.ajax({
+            url:"/GoodsInfoAdd/addGoods",
+            type:"post",
+            data:$("#form").serialize(),
+            success:function(a){
+                var r=confirm("是否跳转查询");
+                if (r==true)
+                {
+                    location.href="/view/toView?viewName=szqy";
+                }
+
+            }
+        })
+    }
+</script>
+<body>
+<a   href="/view/toView?viewName=goodsMassage">返回</a>
+<form id="form">
+    <select id="cc1" class="easyui-combobox" name="flbh1" style="width:200px;"></select>
+    <select id="cc2" class="easyui-combobox" name="flbh2" style="width:200px;"></select>
+    <select id="cc3" class="easyui-combobox" name="pp_id" style="width:200px;"></select>
+    <br/> <br/> <br/> <br/> <br/>
+    商品名称:<input name="shp_mch" id="name" class="easyui-textbox" data-options="iconCls:'icon-man'" > <br>
+    商品描述:<textarea id="content1" name="shp_msh" ></textarea> <br/>
+    图片:<input id="uploadify" type="file" > <br/>
+        <div  id="div1">
+        </div>
+    <div id="fileQueue"></div><!--文件上传的进度条  -->
+</form>
+<a href="javascript:void(0)" class="easyui-linkbutton"  onClick="add()" data-options="iconCls:'icon-add'">新增</a>
+</body>
+</html>

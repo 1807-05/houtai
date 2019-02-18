@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/jquery-1.8.0.js"></script>
+    <script src="/js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="/js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet"; href="/js/easyui1.5/themes/default/easyui.css">
+
+    <script type="text/javascript">
+        $(function(){
+
+            $("[name='shxmId']").val([[${param.shxmId}]]);
+
+            $("#span1").html("[[${param.name}]] >> [[${param.name1}]]");
+        });
+
+        var i = 0;
+
+        function addTable1(){
+
+
+            var	 content ="";
+
+            content+="<tr>";
+            content+="<td>属性值:<input   name='list["+i+"].shxzh' class='easyui-textbox'    style='width:300px'></td>";
+            content+="<td>单位: <input   name='list["+i+"].shxzhMch'   class='easyui-textbox'  style='width:300px'> </td>";
+            content+="<td> <a href='javascript:void(0)' id = 'item_"+i+"' onclick = 'deleteItem(this.id)' class='easyui-linkbutton'>删除</a></td>";
+            content+=" </tr>";
+            ++i;
+            $("#table").append(content);
+        }
+
+        function deleteItem(id){
+            $("#"+id+"").parents('tr').remove();
+        }
+
+       function addGoodsAttr(){
+           $.ajax({
+               url:"/attr/addAttr",
+               type:"POST",
+               data:$("#form").serialize(),
+               success:function(result){
+                   location.href = "/view/toView?viewName=goodsAttr";
+               }
+           })
+       }
+
+       function fanhui(){
+
+           location.href="/view/toView?viewName=goodsAttr";
+       }
+    </script>
+
+</head>
+<body>
+
+<span id="span1"></span> &nbsp;&nbsp;>> &nbsp;&nbsp; 属性添加页
+
+<a id="btn" href="javascript:void(0)" onclick = "fanhui()" class="easyui-linkbutton" data-options="iconCls:'icon-back'">返回</a>
+<hr >
+    <form id = "form">
+        <input type = "hidden"  name = "shxmId" >
+        <table id="table" border="1">
+            <tr>
+                <td>属性名:<input  name="shxmMch"  class="easyui-textbox"  style="width:300px"></td>
+                <td> </td>
+                <td> <a href="javascript:void(0)" onclick = 'addTable1()' class="easyui-linkbutton">添加值</a> </td>
+            </tr>
+        </table>
+    </form>
+   <input type="button" value = "提交" onclick = "addGoodsAttr()">
+</body>
+</html>
